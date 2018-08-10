@@ -1,13 +1,15 @@
 package org.openstack4j.model.image.v2;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+import java.util.Date;
+import java.util.List;
+
 import org.openstack4j.common.Buildable;
 import org.openstack4j.model.common.BasicResource;
 import org.openstack4j.model.image.v2.builder.ImageBuilder;
+import org.openstack4j.openstack.image.v2.domain.GlanceImage.Location;
 
-import java.util.Date;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * A Glance v2.0-2.3 Image
@@ -141,7 +143,7 @@ public interface Image extends BasicResource, Buildable<ImageBuilder> {
     /**
      * @return the minimum disk size in GB that is required to boot the image
      */
-    Integer getMinDisk();
+    Long getMinDisk();
 
     /**
      * @return image protection for deletion
@@ -157,7 +159,7 @@ public interface Image extends BasicResource, Buildable<ImageBuilder> {
     /**
      * @return the minimum amount of RAM in MB that is required to boot the image
      */
-    Integer getMinRam();
+    Long getMinRam();
 
     /**
      * @return hash that is used over the image data
@@ -179,7 +181,7 @@ public interface Image extends BasicResource, Buildable<ImageBuilder> {
     /**
      * @return the size of the image data, in bytes
      */
-    Integer getSize();
+    Long getSize();
 
     /**
      * @return A list of URLs to access the image file in external store.
@@ -187,7 +189,7 @@ public interface Image extends BasicResource, Buildable<ImageBuilder> {
      * This list appears if the show_multiple_locations option is
      * set to true in the Image service's configuration file.
      */
-    List<String> getLocations();
+    List<Location> getLocations();
 
     /**
      * @return the URL to access the image file kept in external store
@@ -248,5 +250,11 @@ public interface Image extends BasicResource, Buildable<ImageBuilder> {
     /**
      * @return Virtual size of image in bytes (READ-ONLY)
      */
-    Integer getVirtualSize();
+    Long getVirtualSize();
+
+    /**
+     * @return Additional property's value from key
+     * https://developer.openstack.org/api-ref/image/v2/index.html#create-an-image
+     */
+    String getAdditionalPropertyValue(String key);
 }

@@ -1,17 +1,26 @@
 package org.openstack4j.openstack.image.v2.domain;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.google.common.base.Objects;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.openstack4j.model.common.builder.BasicResourceBuilder;
 import org.openstack4j.model.image.v2.ContainerFormat;
 import org.openstack4j.model.image.v2.DiskFormat;
 import org.openstack4j.model.image.v2.Image;
 import org.openstack4j.model.image.v2.builder.ImageBuilder;
 import org.openstack4j.openstack.common.ListResult;
+import org.openstack4j.openstack.common.Metadata;
 
-import java.util.Date;
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonAnyGetter;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 /**
  * A glance v2.0-2.3 image model implementation
@@ -21,6 +30,35 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class GlanceImage implements Image {
 
+    private static final Set<String> RESERVED_KEYS = Sets.newHashSet(Arrays.asList(new String[] {
+            "id",
+            "name",
+            "tags",
+            "status",
+            "container_format",
+            "disk_format",
+            "created_at",
+            "updated_at",
+            "min_disk",
+            "min_ram",
+            "protected",
+            "checksum",
+            "owner",
+            "visibility",
+            "size",
+            "locations",
+            "direct_url",
+            "self",
+            "file",
+            "schema",
+            "architecture",
+            "instance_uuid",
+            "kernel_id",
+            "os_version",
+            "os_distro",
+            "ramdisk_id",
+            "virtual_size" }));
+
     private static final long serialVersionUID = 1L;
 
     private String id;
@@ -29,7 +67,7 @@ public class GlanceImage implements Image {
 
     private List<String> tags;
 
-    private ImageStatus imageStatus;
+    private ImageStatus status;
 
     @JsonProperty("container_format")
     private ContainerFormat containerFormat;
@@ -44,10 +82,10 @@ public class GlanceImage implements Image {
     private Date updatedAt;
 
     @JsonProperty("min_disk")
-    private Integer minDisk;
+    private Long minDisk;
 
     @JsonProperty("min_ram")
-    private Integer minRam;
+    private Long minRam;
 
     @JsonProperty("protected")
     private Boolean isProtected;
@@ -58,9 +96,9 @@ public class GlanceImage implements Image {
 
     private ImageVisibility visibility;
 
-    private Integer size;
+    private Long size;
 
-    private List<String> locations;
+    private List<Location> locations;
 
     @JsonProperty("direct_url")
     private String directUrl;
@@ -89,8 +127,9 @@ public class GlanceImage implements Image {
     private String ramdiskId;
 
     @JsonProperty("virtual_size")
-    private Integer virtualSize;
+    private Long virtualSize;
 
+    private Map<String, String> additionalProperties = Maps.newHashMap();
 
     /**
      * {@inheritDoc}
@@ -113,7 +152,7 @@ public class GlanceImage implements Image {
      */
     @Override
     public ImageStatus getStatus() {
-        return imageStatus;
+        return status;
     }
 
     /**
@@ -168,7 +207,7 @@ public class GlanceImage implements Image {
      * {@inheritDoc}
      */
     @Override
-    public Integer getMinDisk() {
+    public Long getMinDisk() {
         return minDisk;
     }
 
@@ -192,7 +231,7 @@ public class GlanceImage implements Image {
      * {@inheritDoc}
      */
     @Override
-    public Integer getMinRam() {
+    public Long getMinRam() {
         return minRam;
     }
 
@@ -224,12 +263,12 @@ public class GlanceImage implements Image {
      * {@inheritDoc}
      */
     @Override
-    public Integer getSize() {
+    public Long getSize() {
         return size;
     }
 
     @Override
-    public List<String> getLocations() {
+    public List<Location> getLocations() {
         return locations;
     }
 
@@ -317,8 +356,28 @@ public class GlanceImage implements Image {
      * {@inheritDoc}
      */
     @Override
-    public Integer getVirtualSize() {
+    public Long getVirtualSize() {
         return virtualSize;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getAdditionalPropertyValue(String key) {
+        return additionalProperties.get(key);
+    }
+
+    @JsonAnyGetter
+    public Map<String, String> getAdditionalProperties() {
+        return additionalProperties;
+    }
+
+    @JsonAnySetter
+    public void setAdditionalProperty(String key, String value) {
+        if (key != null && !RESERVED_KEYS.contains(key)) {
+            additionalProperties.put(key, value);
+        }
     }
 
     /**
@@ -338,11 +397,11 @@ public class GlanceImage implements Image {
      */
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .add("id", id)
                 .add("name", name)
                 .add("tags", tags)
-                .add("imageStatus", imageStatus)
+                .add("imageStatus", status)
                 .add("containerFormat", containerFormat)
                 .add("diskFormat", diskFormat)
                 .add("createdAt", createdAt)
@@ -381,6 +440,15 @@ public class GlanceImage implements Image {
             return images;
         }
     }
+
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	public static class Location {
+		@JsonProperty("url")
+		private String url;
+
+		@JsonProperty("metadata")
+		private Metadata metadat;
+	}
 
     public static class ImageConcreteBuilder extends BasicResourceBuilder<Image, ImageConcreteBuilder> implements ImageBuilder {
         private GlanceImage m;
@@ -433,7 +501,7 @@ public class GlanceImage implements Image {
          * {@inheritDoc}
          */
         @Override
-        public ImageBuilder minDisk(Integer minDisk) {
+        public ImageBuilder minDisk(Long minDisk) {
             m.minDisk = minDisk;
             return this;
         }
@@ -442,7 +510,7 @@ public class GlanceImage implements Image {
          * {@inheritDoc}
          */
         @Override
-        public ImageBuilder minRam(Integer minRam) {
+        public ImageBuilder minRam(Long minRam) {
             m.minRam = minRam;
             return this;
         }
@@ -507,6 +575,17 @@ public class GlanceImage implements Image {
         @Override
         public ImageBuilder ramdiskId(String ramdiskId) {
             m.ramdiskId = ramdiskId;
+            return this;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public ImageBuilder additionalProperty(String key, String value) {
+            if (key != null && !RESERVED_KEYS.contains(key)) {
+                m.additionalProperties.put(key, value);
+            }
             return this;
         }
 
